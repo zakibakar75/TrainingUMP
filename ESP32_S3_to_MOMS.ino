@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ArduinoJson.h>
+//#include <dht.h>
+
+//dht DHT;
+//#define DHT11_PIN 7
 
 JsonDocument doc;
 
@@ -78,7 +82,13 @@ void loop() {
   randNumberTemp = random(20, 80); 
   randNumberHumid = random(40, 100);
 
+  //int chk = DHT.read11(DHT11_PIN);
+  //volatile float real_temperature = DHT.temperature;
+  //volatile float real_humidity = DHT.humidity;
+
   /******* reading ***************/
+  //doc["sensor_temperature"] = real_temperature;
+  //doc["sensor_humidity"] = real_humidity;
   doc["Temperature"] = randNumberTemp;
   doc["Humidity"] = randNumberHumid;
   /**************************************/
