@@ -1,0 +1,3 @@
+https://api.telegram.org/bot6949592584:AAGGOLjJTqy-5eF8se5rxBH26eCBPSU8zH8/getUpdates
+
+Chat id : -4586418932
