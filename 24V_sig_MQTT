@@ -1,0 +1,144 @@
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ArduinoJson.h>
+
+JsonDocument doc;
+
+// Replace with your network credentials (STATION)
+const char* ssid = "MyRouter2";
+const char* password = "mimosian";
+
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
+const char* server = "174.138.28.115";    // MQTT server (of your choice)
+
+/********** For any JSON packet creation ************/
+char msg[120];
+/************* end for JSON packet ******************/
+
+int old_inputvalue_01 = 0;
+int old_inputvalue_02 = 0;
+int old_inputvalue_03 = 0;
+int old_inputvalue_04 = 0;
+int old_inputvalue_05 = 0;
+int old_inputvalue_06 = 0;
+int old_inputvalue_07 = 0;
+
+void initWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi ..");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);
+  }
+  Serial.println(WiFi.localIP());
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(14,INPUT_PULLUP);
+  pinMode(12,INPUT_PULLUP);
+  pinMode(13,INPUT_PULLUP);
+  pinMode(5,INPUT_PULLUP);
+  pinMode(23,INPUT_PULLUP);
+  pinMode(19,INPUT_PULLUP);
+  pinMode(18,INPUT_PULLUP);
+
+  initWiFi();
+  Serial.print("RRSI: ");
+  Serial.println(WiFi.RSSI());
+
+  mqttClient.setServer(server, 1883);
+  //mqttClient.setCallback(callback);
+}
+
+void loop() {
+
+  int inputvalue_01 = 0;
+  int inputvalue_02 = 0;
+  int inputvalue_03 = 0;
+  int inputvalue_04 = 0;
+  int inputvalue_05 = 0;
+  int inputvalue_06 = 0;
+  int inputvalue_07 = 0;
+
+  if (!mqttClient.connected()) {
+    reconnect();
+  }
+
+  delay(500);
+  mqttClient.loop();
+
+  inputvalue_01 = digitalRead(14);
+  inputvalue_02 = digitalRead(12);
+  inputvalue_03 = digitalRead(13);
+  inputvalue_04 = digitalRead(5);
+  inputvalue_05 = digitalRead(23);
+  inputvalue_06 = digitalRead(18);
+  inputvalue_07 = digitalRead(19); 
+
+  Serial.print(F("Input Value 01 : "));
+  Serial.println(inputvalue_01);
+
+  if ( inputvalue_01 != old_inputvalue_01 || 
+       inputvalue_02 != old_inputvalue_02 ||
+       inputvalue_03 != old_inputvalue_03 ||
+       inputvalue_04 != old_inputvalue_04 ||
+       inputvalue_05 != old_inputvalue_05 ||
+       inputvalue_06 != old_inputvalue_06 ||
+       inputvalue_07 != old_inputvalue_07)
+  {
+    
+        /******* reading ***************/
+        doc["Opto_Pin01"] = inputvalue_01;
+        doc["Opto_Pin02"] = inputvalue_02;
+        doc["Opto_Pin03"] = inputvalue_03;
+        doc["Opto_Pin04"] = inputvalue_04;
+        doc["Opto_Pin05"] = inputvalue_05;
+        doc["Opto_Pin06"] = inputvalue_06;
+        doc["Opto_Pin07"] = inputvalue_07;
+        /**************************************/
+        serializeJson(doc, msg);
+
+        Serial.println();
+        Serial.println(F("Publish message : "));
+        Serial.println(msg);
+        mqttClient.publish("24V_sig", msg);
+  }
+
+  old_inputvalue_01 = inputvalue_01;
+  old_inputvalue_02 = inputvalue_02;
+  old_inputvalue_03 = inputvalue_03;
+  old_inputvalue_04 = inputvalue_04;
+  old_inputvalue_05 = inputvalue_05;
+  old_inputvalue_06 = inputvalue_06;
+  old_inputvalue_07 = inputvalue_07;
+}
+
+void reconnect() {
+  // Loop until we're reconnected
+  while (!mqttClient.connected()) {
+    Serial.println();
+    Serial.print(F("Attempting MQTT connection..."));
+    // Attempt to connect
+    if (mqttClient.connect("24V_sig","","")) {
+      Serial.println(F("connected"));
+      // Once connected, publish an announcement...
+      mqttClient.publish("24V_sig", "hello world");
+      // ... and resubscribe
+      //mqttClient.subscribe("LoadCell_01_Rx");
+    } else {
+      Serial.print(F("failed, rc="));
+      Serial.print(mqttClient.state());
+      Serial.println(F(" try again in 5 seconds"));
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
