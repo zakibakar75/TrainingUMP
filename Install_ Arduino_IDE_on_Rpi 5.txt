@@ -1,0 +1,29 @@
+1) Download Arduino IDE 64 bit : wget https://downloads.arduino.cc/arduino-1.8.19-linuxaarch64.tar.xz
+2) tar -xvf arduino-1.8.19-linuxaarch64.tar.xz
+3) cd arduino-1.8.19
+4) sudo ./install.sh
+
+Install ESP32 Core manually :
+
+sudo usermod -a -G dialout $USER && \
+sudo apt-get install git && \
+wget https://bootstrap.pypa.io/get-pip.py && \
+sudo python3 get-pip.py && \
+sudo pip3 install pyserial && \
+mkdir -p ~/Arduino/hardware/espressif && \
+cd ~/Arduino/hardware/espressif && \
+git clone https://github.com/espressif/arduino-esp32.git esp32 && \
+cd esp32/tools && \
+python3 get.py
+
+(How to fix this)
+Error : error: externally-managed-environment   
+
+Open Terminal
+
+1) sudo nano /etc/pip.conf
+
+Add following line:
+[global]
+break-system-packages = true
+
