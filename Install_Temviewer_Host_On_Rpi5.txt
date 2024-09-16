@@ -1,0 +1,2 @@
+Choose Rpi 64-bit from : https://www.teamviewer.com/apac/download/raspberry-pi/
+sudo dpkg -i <the downloaded package>.deb
